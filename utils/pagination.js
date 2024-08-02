@@ -6,10 +6,10 @@ const pagination = async (
   if (page < 1) throw new Error("page must be greater than or equal to 1");
 
   // get page documents
-  page -= 1;
+  const pageIndex = page - 1;
   const total = await schema.clone().countDocuments();
   const data = await schema
-    .skip(page * perPage)
+    .skip(pageIndex * perPage)
     .limit(perPage)
     .exec();
 
