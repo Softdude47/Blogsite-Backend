@@ -4,6 +4,18 @@ import Users from "../models/userModel.js";
 import pagination from "../utils/pagination.js";
 import mongoose, { Types } from "mongoose";
 
+//  @desc    retreives a single post
+//  @route   GET /api/posts/:id
+//  @access  public
+const getPost = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const post = await Post.findById(id);
+  await post.populate("author", "_id firstName lastName email");
+
+  res.json(post);
+});
+
 //  @desc    retreive posts
 //  @route   GET /api/posts
 //  @access  public
@@ -17,12 +29,12 @@ const getPosts = asyncHandler(async (req, res) => {
   let posts;
   if (author) {
     author = await Users.findById(author);
-    posts = Post.find({author})
+    posts = Post.find({ author });
   } else {
-    posts = Post.find()
+    posts = Post.find();
   }
-  posts.populate("author", "_id firstName lastName email")
-  posts = await pagination(posts, {page, perPage})
+  posts.populate("author", "_id firstName lastName email");
+  posts = await pagination(posts, { page, perPage });
   res.json(posts);
 });
 
@@ -38,7 +50,7 @@ const createPosts = asyncHandler(async (req, res) => {
   req.user.save();
 
   await post.populate("author", "_id firstName lastName email");
-  res.json(post)
+  res.json(post);
 });
 
 //  @desc   update existing posts
@@ -54,8 +66,8 @@ const updatePosts = asyncHandler(async (req, res) => {
   post.body = body || post.body;
 
   post.save();
-  await post.populate("author", "_id firstName lastName email")
-  res.json(post)
+  await post.populate("author", "_id firstName lastName email");
+  res.json(post);
 });
 
 //  @desc   delete existing posts
@@ -65,11 +77,11 @@ const deletePosts = asyncHandler(async (req, res) => {
   const id = new Types.ObjectId(req.params.id);
   const idx = req.user.posts.indexOf(id);
 
-  await Post.findByIdAndDelete(id)
-  req.user.posts.splice(idx, 1)
+  await Post.findByIdAndDelete(id);
+  req.user.posts.splice(idx, 1);
   req.user.save();
 
-  res.json({message: "Deleted"});
+  res.json({ message: "Deleted" });
 });
 
-export { getPosts, createPosts, updatePosts, deletePosts };
+export { getPost, getPosts, createPosts, updatePosts, deletePosts };
